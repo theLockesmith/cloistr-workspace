@@ -10,7 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@cloistr/collab-common": "file:../cloistr-collab-common",
+    "@cloistr/collab-common": "^0.6.0",
+    "@cloistr/ui": "^0.4.4",
     "nostr-tools": "^2.23.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
