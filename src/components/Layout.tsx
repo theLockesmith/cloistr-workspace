@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useNostrAuth } from '@cloistr/collab-common/auth'
-import { Header } from '@cloistr/ui/components'
+import { Header, Footer } from '@cloistr/ui/components'
 
 export function Layout() {
   const { authState } = useNostrAuth()
@@ -75,6 +75,8 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <Footer />
     </div>
   )
 }
