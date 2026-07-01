@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNostrAuth } from '../App'
+import { useNostrAuth } from '@cloistr/auth'
 
 interface Group {
   id: string
@@ -30,7 +30,8 @@ const DEMO_INVITATIONS: Invitation[] = [
 ]
 
 export function SocialView() {
-  const { npub } = useNostrAuth()
+  const { authState } = useNostrAuth()
+  const npub = authState.pubkey ?? 'anonymous'
   const [groups] = useState<Group[]>(DEMO_GROUPS)
   const [invitations] = useState<Invitation[]>(DEMO_INVITATIONS)
 
