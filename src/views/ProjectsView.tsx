@@ -12,9 +12,9 @@ interface Project {
 
 // Demo data
 const DEMO_PROJECTS: Project[] = [
-  { id: '1', name: 'Personal', description: 'My private documents', documentCount: 5, collaborators: 1, color: '#3b82f6' },
-  { id: '2', name: 'Work', description: 'Professional projects', documentCount: 12, collaborators: 4, color: '#10b981' },
-  { id: '3', name: 'Research', description: 'Notes and findings', documentCount: 8, collaborators: 2, color: '#f59e0b' },
+  { id: '1', name: 'Personal', description: 'My private documents', documentCount: 5, collaborators: 1, color: 'var(--cloistr-info)' },
+  { id: '2', name: 'Work', description: 'Professional projects', documentCount: 12, collaborators: 4, color: 'var(--cloistr-success)' },
+  { id: '3', name: 'Research', description: 'Notes and findings', documentCount: 8, collaborators: 2, color: 'var(--cloistr-warning)' },
 ]
 
 export function ProjectsView() {
