@@ -1,0 +1,78 @@
+# Audit finding #24: this repo shipped with NO .gitlab-ci.yml at all — nothing
+# built, linted or tested it on any push. This file closes that gap.
+#
+# Scope, and why it stops here:
+#
+# - This is a plain Vite/React app (package.json: dev/build/lint/preview only).
+#   There is no test runner, no test framework dependency, and no *.test.*/
+#   *.spec.* file anywhere in src/ — there is nothing to run as a "test" job.
+#   Do not add one that fakes it; add real tests in a follow-up, then a
+#   test:unit job here.
+# - There is no Dockerfile in this repo, no Atlas role, and no cloistr-config
+#   Application for it (services/workspace/CLAUDE.md: "Atlas Role: none",
+#   status unconfirmed/not deployed). It ships no image, so there is no
+#   build/kaniko job — adding one would just fail on a missing Dockerfile.
+# - `npm run lint` (eslint) currently reports 2 pre-existing errors on
+#   origin/master (react-hooks/set-state-in-effect in DocumentView.tsx,
+#   react-hooks/purity in SocialView.tsx). Per policy this CI addition must not
+#   turn the pipeline red over pre-existing app-code issues, so lint runs with
+#   allow_failure: true — visible, non-blocking. `npm run build` (tsc -b &&
+#   vite build) passes cleanly and is the blocking gate.
+#
+# `extends: .cloistr-rules` is REQUIRED on every job below, not decorative.
+# `.kaniko-build`/`.smoke-test` elsewhere in the fleet carry `rules:` that
+# include merge_request_event, which makes GitLab create an MR pipeline for
+# every MR. In that pipeline a job with no `rules:` falls back to the legacy
+# `only: [branches, tags]` — a merge-request pipeline is neither, so the job
+# is silently NOT CREATED (no error, no skipped badge). This exact silent-skip
+# bug already dropped test/lint jobs from MR pipelines fleet-wide on
+# 2026-07-28 (cloistr-me !12, cloistr-relay !9, aegis/tor !2). See
+# ci-templates:/templates/cloistr-rules.yml for the full writeup. Do not "tidy
+# up" this include away.
+#
+# Image and install flags mirror the fleet's own frontend Dockerfiles
+# (cloistr-tasks, cloistr-vault, cloistr-signer/ui): node:22.23.2-alpine,
+# `npm ci --legacy-peer-deps`. npm 10 rejects lockfiles that omit optional
+# peer deps with plain `npm ci`, which deadlocked docs/sheets/whiteboard for a
+# week — verified locally in this exact image against this repo's lockfile
+# before writing this file (`npm ci --legacy-peer-deps` -> 229 packages, clean).
+
+stages:
+  - test
+
+include:
+  - project: 'coldforge/ci-templates'
+    ref: main
+    file: '/templates/cloistr-rules.yml'
+
+.node-cache: &node-cache
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+    policy: pull-push
+
+# Blocking gate: typecheck (tsc -b, noEmit) + production build (vite build).
+# This is the repo's own `npm run build` script, unmodified.
+typecheck-build:
+  extends: .cloistr-rules
+  stage: test
+  image: node:22.23.2-alpine
+  <<: *node-cache
+  script:
+    - npm ci --legacy-peer-deps
+    - npm run build
+
+# Non-blocking: see header note. Reports the 2 pre-existing eslint errors
+# without turning this new pipeline red over app code this MR does not touch.
+lint:
+  extends: .cloistr-rules
+  stage: test
+  image: node:22.23.2-alpine
+  <<: *node-cache
+  allow_failure: true
+  script:
+    - npm ci --legacy-peer-deps
+    - npm run lint
