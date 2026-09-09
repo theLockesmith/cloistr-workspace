@@ -14,8 +14,8 @@
     "@cloistr/collab-common": "^0.2.15",
     "@cloistr/ui": "^0.41.0",
     "nostr-tools": "^2.25.2",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
